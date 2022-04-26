@@ -32,8 +32,6 @@ func (n *node) matchChildren(part string) []*node {
 	return nodes
 }
 
-// https://geektutu.com/post/gee-day3.html（这里有非常详细的解释）
-
 func (n *node) insert(pattern string, parts []string, height int) {
 	if len(parts) == height {
 		n.pattern = pattern
