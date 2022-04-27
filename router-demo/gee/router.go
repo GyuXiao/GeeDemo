@@ -7,20 +7,21 @@ import (
 
 // 动态路由的功能包括：
 /**
-参数匹配:。例如 /p/:lang/doc，可以匹配 /p/c/doc 和 /p/go/doc。
-通配*。例如 /static/*filepath，可以匹配/static/fav.ico，也可以匹配/static/js/jQuery.js，
+（1）参数匹配:。例如 /p/:lang/doc，可以匹配 /p/c/doc 和 /p/go/doc。
+（2）通配*。例如 /static/*filepath，可以匹配/static/fav.ico，也可以匹配/static/js/jQuery.js，
 这种模式常用于静态服务器，能够递归地匹配子路径
 */
 
 type router struct {
-	roots    map[string]*node
-	handlers map[string]HandlerFunc
+	// 只是 rootsMap 用 Trie 树实现，其他地方和 context-demo 没有区别
+	rootsMap    map[string]*node
+	handlersMap map[string]HandlerFunc
 }
 
 func newRouter() *router {
 	return &router{
-		roots:    make(map[string]*node),
-		handlers: make(map[string]HandlerFunc),
+		rootsMap:    make(map[string]*node),
+		handlersMap: make(map[string]HandlerFunc),
 	}
 }
 
@@ -40,20 +41,19 @@ func parsePattern(pattern string) []string {
 
 func (r *router) addRoute(method string, pattern string, handler HandlerFunc) {
 	parts := parsePattern(pattern)
-
 	key := method + "-" + pattern
-	_, ok := r.roots[method]
+	_, ok := r.rootsMap[method]
 	if !ok {
-		r.roots[method] = &node{}
+		r.rootsMap[method] = &node{}
 	}
-	r.roots[method].insert(pattern, parts, 0)
-	r.handlers[key] = handler
+	r.rootsMap[method].insert(pattern, parts, 0)
+	r.handlersMap[key] = handler
 }
 
 func (r *router) getRoute(method string, path string) (*node, map[string]string) {
 	searchParts := parsePattern(path)
 	params := make(map[string]string)
-	root, ok := r.roots[method]
+	root, ok := r.rootsMap[method]
 	if !ok {
 		return nil, nil
 	}
@@ -75,22 +75,22 @@ func (r *router) getRoute(method string, path string) (*node, map[string]string)
 	return nil, nil
 }
 
-//func (r *router) getRoutes(method string) []*node {
-//	root, ok := r.roots[method]
-//	if !ok {
-//		return nil
-//	}
-//	nodes := make([]*node, 0)
-//	//root.travel(&nodes)
-//	return nodes
-//}
+func (r *router) getRoutes(method string) []*node {
+	root, ok := r.rootsMap[method]
+	if !ok {
+		return nil
+	}
+	nodes := make([]*node, 0)
+	root.travel(&nodes)
+	return nodes
+}
 
 func (r *router) handle(c *Context) {
 	n, params := r.getRoute(c.Method, c.Path)
 	if n != nil {
 		c.Params = params
 		key := c.Method + "-" + n.pattern
-		r.handlers[key](c)
+		r.handlersMap[key](c)
 	} else {
 		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
 	}

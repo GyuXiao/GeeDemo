@@ -6,4 +6,6 @@ Gin 是一个优秀的框架，因此，本仓库命名为 GeeDemo，也算是�
 - context-demo：渐入佳境，设计上下文
   - 将 router 独立出来
   - 封装 Request 和  Response，提供对 JSON、HTML 等返回类型的支持
-- router-demo：processing，敬请期待
+- router-demo：如日中天，完善 route 的设计
+  - 使用 Trie 树实现动态路由解析
+  - 支持两种模式 `:name` 和 `*filepath` 

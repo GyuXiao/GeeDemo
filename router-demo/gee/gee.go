@@ -16,9 +16,15 @@ import (
 // value：handler
 type HandlerFunc func(*Context)
 
-// Engine 定义一个结构体
+type H map[string]interface{}
+
+// Engine 定义一个结构体（和 context-demo 里的写法没有太大差别）
 type Engine struct {
 	router *router
+}
+
+func (engine *Engine) AddRoute(method string, pattern string, handler HandlerFunc) {
+	engine.router.addRoute(method, pattern, handler)
 }
 
 // Get 请求
@@ -29,10 +35,6 @@ func (engine *Engine) Get(pattern string, handler HandlerFunc) {
 // Post 请求
 func (engine *Engine) Post(pattern string, handler HandlerFunc) {
 	engine.AddRoute("POST", pattern, handler)
-}
-
-func (engine *Engine) AddRoute(method string, pattern string, handler HandlerFunc) {
-	engine.router.addRoute(method, pattern, handler)
 }
 
 // Run 请求

@@ -11,6 +11,7 @@ import (
 // 属性 Params
 // 方法 Param(key string)
 // 来提供对路由参数的访问
+// 除此之外，和之前的 Context 设计没有差别
 type Context struct {
 	Writer     http.ResponseWriter
 	Req        *http.Request
@@ -26,11 +27,11 @@ func (c *Context) Param(key string) string {
 }
 
 // 提供访问 Query 和 PostForm 参数的方法
+
 func (c *Context) PostForm(key string) string {
 	return c.Req.FormValue(key)
 }
 
-// Query 轮询方法
 func (c *Context) Query(key string) string {
 	return c.Req.URL.Query().Get(key)
 }
@@ -40,7 +41,6 @@ func (c *Context) SetStatus(code int) {
 	c.Writer.WriteHeader(code)
 }
 
-// SetHeader 方法
 func (c *Context) SetHeader(key string, value string) {
 	c.Writer.Header().Set(key, value)
 }
